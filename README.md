@@ -1,12 +1,8 @@
 ---
-aliases:
-tags:
+aliases: case_loft
+tags: case_loft
 autor: Cleucio Diogo Bastos Ferreira
-criado em:
-atualizado em:
-atualizado por:
-classificações:
-  - Em desenvolvimento
+criado em: 11/12/2025 12:35
 ---
 
 Este projeto foi desenvolvido por: Cleucio Diogo Bastos Ferreira
