@@ -1,0 +1,22 @@
+relationship f985b87e-9669-a3db-f75c-b59d4edb5ffe
+	fromColumn: fAcionamentos.dt_acionamento
+	toColumn: dCalendario.Data
+
+relationship 2498bce9-6a73-a64c-904e-7f98066c8e83
+	isActive: false
+	fromColumn: fAcionamentos.dt_ult_acionamento
+	toColumn: dCalendario.Data
+
+relationship 00578a2c-036a-a8d3-eac9-85ac8d452d0a
+	fromColumn: dContratos.dt_contratacao
+	toColumn: dCalendario.Data
+
+relationship 9d63501e-f590-8315-0183-63df01237e6f
+	isActive: false
+	fromColumn: fAcionamentos.id_contrato
+	toColumn: dContratos.id_contrato
+
+relationship 322237c6-1299-e3ec-4230-68e6f62e3a3c
+	fromColumn: dClientes.dt_pri_contracao
+	toColumn: dCalendario.Data
+

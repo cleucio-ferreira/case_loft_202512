@@ -1,0 +1,11 @@
+# Power BI (PBIP) - arquivos locais/temporários gerados pelo Power BI Desktop
+**/.pbi/localSettings.json
+**/.pbi/cache.abf
+
+# Windows (comum em times)
+Thumbs.db
+Desktop.ini
+
+# VS Code (opcional, mas básico)
+.vscode/
+.pbix

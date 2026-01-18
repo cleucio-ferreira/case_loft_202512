@@ -1,0 +1,307 @@
+table dMedidas
+	lineageTag: 86ecfa8e-2dd5-4b36-b765-831ba00aacfc
+
+	measure 'Flag últimos 12 meses' = ```
+			
+			VAR DataSelecionada =
+			    COALESCE(
+			        SELECTEDVALUE ( dCalendario[MesInicio] ),
+			        MAX ( dCalendario[MesInicio] )
+			    )
+			VAR DataMin =
+			    EDATE ( DataSelecionada, -12 )
+			RETURN
+			CALCULATE (
+			    1,
+			    dCalendario[MesInicio] >= DataMin,
+			    dCalendario[MesInicio] <= DataSelecionada
+			)
+			
+			```
+		formatString: 0
+		lineageTag: 4e4eaaa2-4cc5-4378-8720-1f56faf5223d
+
+	measure 'med acionamentos por contrato' = DIVIDE([Qtd Acionamentos],[Qtd Acionamentos])
+		formatString: 0
+		displayFolder: acionamentos
+		lineageTag: 3cdf52fe-0f13-43c6-86ef-f4f4f9eb1bae
+
+	measure 'Qtd Acionamentos' = COUNTROWS(fAcionamentos)
+		formatString: 0
+		displayFolder: acionamentos\volume
+		lineageTag: 9f7dce74-9e60-4ead-98b9-67056fbe0076
+
+	measure 'Clientes por status' = ```
+			
+			VAR ClientesDoStatus =
+			    CALCULATETABLE(
+			        VALUES ( dClientes[id_cliente] ),
+			        dContratos
+			    )
+			RETURN
+			COUNTROWS ( ClientesDoStatus )
+			
+			```
+		formatString: 0
+		displayFolder: clientes
+		lineageTag: 13e38421-adfc-4b19-8141-bcc5bcadde93
+
+	measure 'Qtd Clientes' = COUNTROWS(dClientes)
+		formatString: 0
+		displayFolder: clientes\volume
+		lineageTag: a2f3c44f-b5a9-4d01-b615-3ad42e536eec
+
+	measure max_acionamentos = MAXX(VALUES(dCalendario[Data]),[Qtd Acionamentos]*1.1)
+		formatString: 0
+		displayFolder: acionamentos
+		lineageTag: 9a810193-a545-4b58-b83a-de33b308a495
+
+	measure 'Qtd Contratos' = COUNTROWS (dContratos)
+		formatString: 0
+		displayFolder: contratos\volume
+		lineageTag: 917f39c3-4cf6-494c-a60e-250bbb23e335
+
+	measure 'contratos 12 meses' =
+			CALCULATE(
+			    [Qtd Contratos],
+			    FILTER(
+			        dCalendario,
+			        [Flag últimos 12 meses] = 1
+			    )
+			) //tentativa frustrada de exibir apenas 12 meses sem precisar criar outra dCalendário
+		formatString: 0
+		displayFolder: contratos
+		lineageTag: 9ef8f71f-a14f-4b31-a110-0c77db77357a
+
+	measure 'Qtd Contratos Txt' = FORMAT( [Qtd Contratos], "#, ###")
+		displayFolder: contratos\volume
+		lineageTag: 09b45846-e849-448f-be9a-29279682facb
+
+	measure 'Qtd Contratos YoY Txt' = ```
+			
+			VAR atual = [Qtd Contratos]
+			VAR anterior = CALCULATE(
+			    [Qtd Contratos],
+			    DATEADD(dCalendario[Data],-1,YEAR)
+			)
+			VAR _dif_txt = FORMAT( atual - anterior, "+#,###;-#,###")
+			VAR _pct = DIVIDE(atual-anterior,anterior)
+			VAR _format = FORMAT(_pct, "0.0%;0.0%")
+			VAR _cf = IF(
+			    _pct>0,
+			    UNICHAR(129029) & _format & " (" & _dif_txt & " vs ano anterior)",
+			    UNICHAR(129031) & _format & " (" & _dif_txt & " vs ano anterior)"
+			)
+			RETURN
+			_cf
+			
+			```
+		displayFolder: contratos\volume
+		lineageTag: d95b0f63-9d35-49fe-b807-c96428e6a155
+
+	measure 'CF Qtd Contratos YoY Txt' =
+			
+			VAR atual = [Qtd Contratos]
+			VAR anterior = CALCULATE(
+			    [Qtd Contratos],
+			    DATEADD(dCalendario[Data],-1,YEAR)
+			)
+			VAR _pct = DIVIDE(atual-anterior,anterior)
+			RETURN
+			SWITCH(
+			    TRUE(),
+			    _pct>0, "Green",
+			    _pct<0, "Red",
+			    "Grey"
+			)
+		displayFolder: contratos\volume
+		lineageTag: 47cbe5d3-447e-4ca6-8146-63db8a8b6d11
+
+	measure 'CF Qtd Contratos Barras' =
+			
+			VAR _maxval = MAXX(
+			    SUMMARIZE(
+			        ALLSELECTED(dCalendario),
+			        dCalendario[MesAnoNumero],
+			        "Qtd Contratos", [Qtd Contratos]
+			    ),
+			    [Qtd Contratos]
+			)
+			VAR _minval = MINX(
+			    SUMMARIZE(
+			        ALLSELECTED(dCalendario),
+			        dCalendario[MesAnoNumero],
+			        "Qtd Contratos", [Qtd Contratos]
+			    ),
+			    [Qtd Contratos]
+			)
+			
+			RETURN
+			SWITCH(
+			    TRUE(),
+			    _maxval = [Qtd Contratos],"Green",
+			    _minval = [Qtd Contratos], "Red",
+			    "Light Grey"
+			)
+		displayFolder: contratos\volume
+		lineageTag: 48193ad2-f719-42c7-ad38-b9af4d3e4320
+
+	measure 'CF Qtd Clientes Barras' =
+			
+			VAR _maxval = MAXX(
+			    SUMMARIZE(
+			        ALLSELECTED(dCalendario),
+			        dCalendario[MesAnoNumero],
+			        "Qtd Clientes", [Qtd Clientes]
+			    ),
+			    [Qtd Clientes]
+			)
+			VAR _minval = MINX(
+			    SUMMARIZE(
+			        ALLSELECTED(dCalendario),
+			        dCalendario[MesAnoNumero],
+			        "Qtd Clientes", [Qtd Clientes]
+			    ),
+			    [Qtd Clientes]
+			)
+			
+			RETURN
+			SWITCH(
+			    TRUE(),
+			    _maxval = [Qtd Clientes],"Green",
+			    _minval = [Qtd Clientes], "Red",
+			    "Light Grey"
+			)
+		displayFolder: clientes\volume
+		lineageTag: b5ab94a7-45e4-457a-9e7d-77ef2216b950
+
+	measure 'CF Qtd Clientes YoY Txt' =
+			
+			VAR atual = [Qtd Clientes]
+			VAR anterior = CALCULATE(
+			    [Qtd Clientes],
+			    DATEADD(dCalendario[Data],-1,YEAR)
+			)
+			VAR _pct = DIVIDE(atual-anterior,anterior)
+			RETURN
+			SWITCH(
+			    TRUE(),
+			    _pct>0, "Green",
+			    _pct<0, "Red",
+			    "Grey"
+			)
+		displayFolder: clientes\volume
+		lineageTag: 41992d80-dcab-47f1-95ab-425c5e299052
+
+	measure 'Qtd Clientes Txt' = FORMAT( [Qtd Clientes], "#, ###")
+		displayFolder: clientes\volume
+		lineageTag: e0bd1dfa-6b71-4dc2-9cc2-9db1446bcc7b
+
+	measure 'Qtd Clientes YoY Txt' = ```
+			
+			VAR atual = [Qtd Clientes]
+			VAR anterior = CALCULATE(
+			    [Qtd Clientes],
+			    DATEADD(dCalendario[Data],-1,YEAR)
+			)
+			VAR _dif_txt = FORMAT( atual - anterior, "+#,###;-#,###")
+			VAR _pct = DIVIDE(atual-anterior,anterior)
+			VAR _format = FORMAT(_pct, "0.0%;0.0%")
+			VAR _cf = IF(
+			    _pct>0,
+			    UNICHAR(129029) & _format & " (" & _dif_txt & " vs ano anterior)",
+			    UNICHAR(129031) & _format & " (" & _dif_txt & " vs ano anterior)"
+			)
+			RETURN
+			_cf
+			
+			```
+		displayFolder: clientes\volume
+		lineageTag: af13af83-2b52-43f4-80cb-3f824cdb1e55
+
+	measure 'CF Qtd Acionamentos Barras' =
+			
+			VAR _maxval = MAXX(
+			    SUMMARIZE(
+			        ALLSELECTED(dCalendario),
+			        dCalendario[MesAnoNumero],
+			        "Qtd Acionamentos", [Qtd Acionamentos]
+			    ),
+			    [Qtd Acionamentos]
+			)
+			VAR _minval = MINX(
+			    SUMMARIZE(
+			        ALLSELECTED(dCalendario),
+			        dCalendario[MesAnoNumero],
+			        "Qtd Clientes", [Qtd Acionamentos]
+			    ),
+			    [Qtd Acionamentos]
+			)
+			
+			RETURN
+			SWITCH(
+			    TRUE(),
+			    _maxval = [Qtd Acionamentos],"Green",
+			    _minval = [Qtd Acionamentos], "Red",
+			    "Light Grey"
+			)
+		displayFolder: acionamentos\volume
+		lineageTag: dc5c663f-70f0-4daa-ac3d-ca2e26f7384e
+
+	measure 'CF Qtd Acionamentos YoY Txt' =
+			
+			VAR atual = [Qtd Acionamentos]
+			VAR anterior = CALCULATE(
+			    [Qtd Acionamentos],
+			    DATEADD(dCalendario[Data],-1,YEAR)
+			)
+			VAR _pct = DIVIDE(atual-anterior,anterior)
+			RETURN
+			SWITCH(
+			    TRUE(),
+			    _pct>0, "Green",
+			    _pct<0, "Red",
+			    "Grey"
+			)
+		displayFolder: acionamentos\volume
+		lineageTag: 55e02c26-a5fa-4206-bef7-f680b1518bd4
+
+	measure 'Qtd Acionamentos Txt' = FORMAT( [Qtd Acionamentos], "#, ###")
+		displayFolder: acionamentos\volume
+		lineageTag: 68235b4e-f18e-4157-84bd-1e2e891c0a15
+
+	measure 'Qtd Acionamentos YoY Txt' =
+			
+			VAR atual = [Qtd Acionamentos]
+			VAR anterior = CALCULATE(
+			    [Qtd Acionamentos],
+			    DATEADD(dCalendario[Data],-1,YEAR)
+			)
+			VAR _dif_txt = FORMAT( atual - anterior, "+#,###;-#,###")
+			VAR _pct = DIVIDE(atual-anterior,anterior)
+			VAR _format = FORMAT(_pct, "0.0%;0.0%")
+			VAR _cf = IF(
+			    _pct>0,
+			    UNICHAR(129029) & _format & " (" & _dif_txt & " vs ano anterior)",
+			    UNICHAR(129031) & _format & " (" & _dif_txt & " vs ano anterior)"
+			)
+			RETURN
+			_cf
+		displayFolder: acionamentos\volume
+		lineageTag: 96b65654-186a-435d-bb0a-4be8b8c3c3ab
+
+	column Value
+		formatString: 0
+		lineageTag: 9ed014a2-409e-43a3-87b9-1ff5394e816f
+		summarizeBy: sum
+		isNameInferred
+		sourceColumn: [Value]
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dMedidas = calculated
+		mode: import
+		source = { 0 }
+
+	annotation PBI_Id = d32a43721dce4633979090be3d79340e
+

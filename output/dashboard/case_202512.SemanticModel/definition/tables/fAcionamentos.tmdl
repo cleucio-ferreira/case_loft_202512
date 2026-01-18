@@ -1,0 +1,72 @@
+table fAcionamentos
+	lineageTag: ee40e4f2-0240-4bb0-87e3-151e79a69f82
+
+	column id_acionamento
+		dataType: string
+		lineageTag: bc4877fc-85f3-4260-b879-34d26e6c85d5
+		summarizeBy: none
+		sourceColumn: id_acionamento
+
+		annotation SummarizationSetBy = Automatic
+
+	column id_contrato
+		dataType: string
+		lineageTag: 2a1e8139-2769-4ecc-a987-2180caaaf905
+		summarizeBy: none
+		sourceColumn: id_contrato
+
+		annotation SummarizationSetBy = Automatic
+
+	column descr_canal
+		dataType: string
+		lineageTag: 63175829-4cce-4fc5-ae58-cf220d7ec96a
+		summarizeBy: none
+		sourceColumn: descr_canal
+
+		annotation SummarizationSetBy = Automatic
+
+	column dt_acionamento
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: 438ec548-a260-4bae-ac1d-476c5628e966
+		summarizeBy: none
+		sourceColumn: dt_acionamento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column dt_ult_acionamento
+		dataType: dateTime
+		formatString: Long Date
+		lineageTag: d1564405-7668-4ee2-8244-2fed549a049f
+		summarizeBy: none
+		sourceColumn: dt_ult_acionamento
+
+		annotation SummarizationSetBy = Automatic
+
+		annotation UnderlyingDateTimeDataType = Date
+
+	column canal_ult_acionamento
+		dataType: string
+		lineageTag: 252dab39-ea4e-4bff-9a62-c6301853152a
+		summarizeBy: none
+		sourceColumn: canal_ult_acionamento
+
+		annotation SummarizationSetBy = Automatic
+
+	partition fAcionamentos = m
+		mode: import
+		source =
+				let
+				    Fonte = Excel.Workbook(File.Contents("D:\Meu Drive\00. Cases\case_loft_202512\input\star_schema\acionamentos.xlsx"), null, true),
+				    acionamentos_Sheet = Fonte{[Item="acionamentos",Kind="Sheet"]}[Data],
+				    #"Cabeçalhos Promovidos" = Table.PromoteHeaders(acionamentos_Sheet, [PromoteAllScalars=true]),
+				    #"Tipo Alterado" = Table.TransformColumnTypes(#"Cabeçalhos Promovidos",{{"id_acionamento", type text}, {"id_contrato", type text}, {"descr_canal", type text}, {"dt_acionamento", type date}, {"dt_ult_acionamento", type date}, {"canal_ult_acionamento", type text}})
+				in
+				    #"Tipo Alterado"
+
+	annotation PBI_NavigationStepName = Navegação
+
+	annotation PBI_ResultType = Table
+
