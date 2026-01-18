@@ -5,7 +5,7 @@ autor: Cleucio Diogo Bastos Ferreira
 criado em: 11/12/2025 12:35
 ---
 
-Este projeto foi desenvolvido por: Cleucio Diogo Bastos Ferreira
+Desenvolvido por: Cleucio Diogo Bastos Ferreira
 
 # Agradecimento
 
@@ -62,5 +62,3 @@ Pontos de atenção e sugestões: `./case_loft_202512/output/documentacao/Case L
 
 > [!note]
 > A documentação foi gerada integralmente utilizando a linguagem `markdown` e os recursos disponibilizados pelo o software Obsidian, que é um ótimo gestor de arquivos do tipo markdown.
-
-Desenvolvido por: Cleucio Diogo Bastos Ferreira
